@@ -38,6 +38,7 @@ func parseArgs() *NotifierConfig {
 func startTailFile(file string) {
 	tailConfig := tail.Config{
 		Follow: true,
+		Logger: tail.DiscardingLogger,
 		Location: &tail.SeekInfo{
 			Offset: 0,
 			Whence: os.SEEK_END,
