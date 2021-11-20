@@ -11,12 +11,14 @@ type NotifierConfig struct {
 
 	tgBotToken string
 	tgChatID   int64
+
+	justWhenAFK bool
 }
 
 type PoeTradeNotifier struct {
 	config *NotifierConfig
 
-	tgBot *tgbotapi.BotAPI 
+	tgBot *tgbotapi.BotAPI
 }
 
 func (notifier *PoeTradeNotifier) init(config *NotifierConfig) {

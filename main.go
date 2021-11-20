@@ -12,6 +12,7 @@ func parseArgs() *NotifierConfig {
 	path := flag.String("p", "", "path to Client.txt")
 	token := flag.String("t", "", "tg bot token")
 	chatID := flag.Int("c", 0, "tg chat id")
+	whenAfk := flag.Bool("a", false, "send notifications only when AFK")
 	flag.Parse()
 
 	if *path == "" {
@@ -30,6 +31,7 @@ func parseArgs() *NotifierConfig {
 		clientFile: *path,
 		tgBotToken: *token,
 		tgChatID: int64(*chatID),
+		justWhenAFK: *whenAfk,
 	}
 }
 
