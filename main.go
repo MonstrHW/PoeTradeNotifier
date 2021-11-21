@@ -1,12 +1,18 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"log"
 	"os"
 
 	"github.com/hpcloud/tail"
 )
+
+func fileExists(path string) bool {
+    _, err := os.Stat(path)
+    return !errors.Is(err, os.ErrNotExist)
+}
 
 func parseArgs() *NotifierConfig {
 	path := flag.String("p", "", "path to Client.txt")
@@ -17,6 +23,10 @@ func parseArgs() *NotifierConfig {
 
 	if *path == "" {
 		log.Fatal("Path to Client.txt didn't set")
+	} 
+
+	if !fileExists(*path) {
+		log.Fatal("File in selected path to Client.txt didn't exists")
 	}
 
 	if *token == "" {
