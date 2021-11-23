@@ -1,16 +1,11 @@
 package main
 
-import (
-	"log"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-)
-
 type NotifierConfig struct {
 	clientFile string
 
 	tgBotToken string
 	tgChatID   int64
+	sendChatID bool
 
 	justWhenAFK bool
 }
@@ -18,25 +13,18 @@ type NotifierConfig struct {
 type PoeTradeNotifier struct {
 	config *NotifierConfig
 
-	tgBot *tgbotapi.BotAPI
+	bot *TgBot
 }
 
 func (notifier *PoeTradeNotifier) init(config *NotifierConfig) {
 	notifier.config = config
 
-	bot, err := tgbotapi.NewBotAPI(notifier.config.tgBotToken)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
-	notifier.tgBot = bot
+	notifier.bot = &TgBot{}
+	notifier.bot.init(notifier.config.tgBotToken)
 }
 
-func (notifier *PoeTradeNotifier) sendMessageToBot(message string) {
-	msg := tgbotapi.NewMessage(notifier.config.tgChatID, message)
-	notifier.tgBot.Send(msg)
+func (notifier *PoeTradeNotifier) sendNotify(message string) {
+	notifier.bot.sendMessageByChatID(message, notifier.config.tgChatID)
 }
 
 var poeTradeNotifier PoeTradeNotifier

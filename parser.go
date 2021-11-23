@@ -107,6 +107,6 @@ func grabLine(line string) {
 	if isBuyMessage(line) {
 		data := parseBuyMessage(line)
 		message := formatMessageForSend(data)
-		poeTradeNotifier.sendMessageToBot(message)
+		poeTradeNotifier.sendNotify(message)
 	}
 }

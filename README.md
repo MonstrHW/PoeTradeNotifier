@@ -7,3 +7,4 @@ Command-line tool for listening log file of game named as "Path of Exile" and lo
 * t - Telegram Bot token. (String)
 * c - Chat ID (Number)
 * a - Send notifications only when player in AFK state. (Boolean)
+* s - Start tool only for send current tg chat id (Boolean)
