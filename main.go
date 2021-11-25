@@ -11,8 +11,8 @@ import (
 )
 
 func fileExists(path string) bool {
-    _, err := os.Stat(path)
-    return !errors.Is(err, os.ErrNotExist)
+	_, err := os.Stat(path)
+	return !errors.Is(err, os.ErrNotExist)
 }
 
 func parseArgs() *NotifierConfig {
@@ -28,7 +28,7 @@ func parseArgs() *NotifierConfig {
 	}
 
 	if *sendChatID == true {
-		return &NotifierConfig {
+		return &NotifierConfig{
 			tgBotToken: *token,
 			sendChatID: *sendChatID,
 		}
@@ -36,7 +36,7 @@ func parseArgs() *NotifierConfig {
 
 	if *path == "" {
 		log.Fatal("Path to Client.txt didn't set")
-	} 
+	}
 
 	if !fileExists(*path) {
 		log.Fatal("File in selected path to Client.txt didn't exists")
@@ -46,19 +46,19 @@ func parseArgs() *NotifierConfig {
 		log.Fatal("Telegram Chat ID didn't set, if you don't know it, start tool with -s key")
 	}
 
-	return &NotifierConfig {
-		clientFile: *path,
-		tgBotToken: *token,
-		tgChatID: int64(*chatID),
+	return &NotifierConfig{
+		clientFile:  *path,
+		tgBotToken:  *token,
+		tgChatID:    int64(*chatID),
 		justWhenAFK: *whenAfk,
-		sendChatID: *sendChatID,
+		sendChatID:  *sendChatID,
 	}
 }
 
 func startTailFile(file string) {
 	tailConfig := tail.Config{
 		Follow: true,
-		Poll: true,
+		Poll:   true,
 		Logger: tail.DiscardingLogger,
 
 		Location: &tail.SeekInfo{
