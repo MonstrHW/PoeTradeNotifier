@@ -29,12 +29,11 @@ jobs:
     - name: Build Windows
       run: GOOS=windows GOARCH=amd64 go build -v ./...
 
-    - name: Upload afrtifacts
-      uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v2
       with:
         name: poe_trade_notifier_linux
         path: poe_trade_notifier
-      uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v2
       with:
         name: poe_trade_notifier_windows
         path: poe_trade_notifier.exe
