@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - add-workflow
   pull_request:
     branches:
       - master
