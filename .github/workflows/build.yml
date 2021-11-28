@@ -36,9 +36,9 @@ jobs:
 
     - uses: actions/upload-artifact@v2
       with:
-        name: poe_trade_notifier_linux
-        path: poe_trade_notifier
+        name: PoeTradeNotifier_linux
+        path: PoeTradeNotifier
     - uses: actions/upload-artifact@v2
       with:
-        name: poe_trade_notifier_windows
-        path: poe_trade_notifier.exe
+        name: PoeTradeNotifier_windows
+        path: PoeTradeNotifier.exe
