@@ -15,7 +15,22 @@ func fileExists(path string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-func parseArgs() *NotifierConfig {
+func printAndPause(v ...interface{}) {
+	fmt.Println(v...)
+
+	fmt.Println("Press Enter for exit...")
+	fmt.Scanln()
+}
+
+type ParseError struct {
+	message string
+}
+
+func (e *ParseError) Error() string {
+	return e.message
+}
+
+func parseArgs() (*NotifierConfig, error) {
 	path := flag.String("p", "", "path to Client.txt")
 	token := flag.String("t", "", "tg bot token")
 	chatID := flag.Int("c", 0, "tg chat id")
@@ -24,26 +39,26 @@ func parseArgs() *NotifierConfig {
 	flag.Parse()
 
 	if *token == "" {
-		log.Fatal("Telegram Bot Token didn't set")
+		return nil, &ParseError{"Telegram Bot Token didn't set"}
 	}
 
 	if *sendChatID == true {
 		return &NotifierConfig{
 			tgBotToken: *token,
 			sendChatID: *sendChatID,
-		}
+		}, nil
 	}
 
 	if *path == "" {
-		log.Fatal("Path to Client.txt didn't set")
+		return nil, &ParseError{"Path to Client.txt didn't set"}
 	}
 
 	if !fileExists(*path) {
-		log.Fatal("File in selected path to Client.txt didn't exists")
+		return nil, &ParseError{"File in selected path to Client.txt didn't exists"}
 	}
 
 	if *chatID == 0 {
-		log.Fatal("Telegram Chat ID didn't set, if you don't know it, start tool with -s key")
+		return nil, &ParseError{"Telegram Chat ID didn't set, if you don't know it, start tool with -s key"}
 	}
 
 	return &NotifierConfig{
@@ -52,7 +67,7 @@ func parseArgs() *NotifierConfig {
 		tgChatID:    int64(*chatID),
 		justWhenAFK: *whenAfk,
 		sendChatID:  *sendChatID,
-	}
+	}, nil
 }
 
 func startTailFile(file string) {
@@ -78,7 +93,13 @@ func startTailFile(file string) {
 }
 
 func main() {
-	config := parseArgs()
+	config, err := parseArgs()
+	if err != nil {
+		printAndPause(err)
+
+		return
+	}
+
 	poeTradeNotifier.init(config)
 
 	if poeTradeNotifier.config.sendChatID == true {
