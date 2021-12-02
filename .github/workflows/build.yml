@@ -29,22 +29,19 @@ jobs:
         mkdir PoeTradeNotifier
         go build -v -o ./PoeTradeNotifier ./...
         mv start.sh ./PoeTradeNotifier
-        zip -r PoeTradeNotifier_linux.zip ./PoeTradeNotifier
-        rm -r PoeTradeNotifier
+    - uses: actions/upload-artifact@v2
+      with:
+        name: PoeTradeNotifier_linux
+        path: PoeTradeNotifier
+    - run: rm -r PoeTradeNotifier
 
     - name: Build for Windows
       run: |
         mkdir PoeTradeNotifier
         GOOS=windows GOARCH=amd64 go build -v -o ./PoeTradeNotifier ./...
         mv start.bat ./PoeTradeNotifier
-        zip -r PoeTradeNotifier_windows.zip ./PoeTradeNotifier
-        rm -r PoeTradeNotifier
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: PoeTradeNotifier_linux
-        path: PoeTradeNotifier_linux.zip
     - uses: actions/upload-artifact@v2
       with:
         name: PoeTradeNotifier_windows
-        path: PoeTradeNotifier_windows.zip
+        path: PoeTradeNotifier
+    - run: rm -r PoeTradeNotifier
