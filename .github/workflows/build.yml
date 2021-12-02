@@ -32,7 +32,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: PoeTradeNotifier_linux
-        path: PoeTradeNotifier
+        path: PoeTradeNotifier/
     - run: rm -r PoeTradeNotifier
 
     - name: Build for Windows
@@ -43,5 +43,5 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: PoeTradeNotifier_windows
-        path: PoeTradeNotifier
+        path: PoeTradeNotifier/
     - run: rm -r PoeTradeNotifier
