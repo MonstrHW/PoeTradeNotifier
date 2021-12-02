@@ -25,16 +25,23 @@ jobs:
         go get github.com/hpcloud/tail
 
     - name: Build for Linux
-      run: go build -v ./...
-
-    - name: Build for Windows
-      run: GOOS=windows GOARCH=amd64 go build -v ./...
-
+      run: |
+        mkdir PoeTradeNotifier
+        go build -v -o ./PoeTradeNotifier ./...
+        mv start.sh ./PoeTradeNotifier
     - uses: actions/upload-artifact@v2
       with:
         name: PoeTradeNotifier_linux
-        path: PoeTradeNotifier
+        path: PoeTradeNotifier/
+    - run: rm -r PoeTradeNotifier
+
+    - name: Build for Windows
+      run: |
+        mkdir PoeTradeNotifier
+        GOOS=windows GOARCH=amd64 go build -v -o ./PoeTradeNotifier ./...
+        mv start.bat ./PoeTradeNotifier
     - uses: actions/upload-artifact@v2
       with:
         name: PoeTradeNotifier_windows
-        path: PoeTradeNotifier.exe
+        path: PoeTradeNotifier/
+    - run: rm -r PoeTradeNotifier
