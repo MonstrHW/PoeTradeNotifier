@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'README.md'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Set up Go modules
+      run: |
+        go get github.com/go-telegram-bot-api/telegram-bot-api
+        go get github.com/hpcloud/tail
+
+    - name: Build for Linux
+      run: |
+        go build -v ./...
+        zip PoeTradeNotifier_linux.zip PoeTradeNotifier start.sh
+
+    - name: Build for Windows
+      run: |
+        GOOS=windows GOARCH=amd64 go build -v ./...
+        zip PoeTradeNotifier_windows.zip PoeTradeNotifier.exe start.bat
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          PoeTradeNotifier_linux.zip
+          PoeTradeNotifier_windows.zip
+        generate_release_notes: true
