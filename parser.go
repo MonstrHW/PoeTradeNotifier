@@ -28,8 +28,8 @@ func isAFKLine(line string) bool {
 	return isStringLikePattern(line, AfkMessagePattern)
 }
 
-func isLogStartLine(line string) bool {
-	return isStringLikePattern(line, `LOG FILE OPENING`)
+func isConnectedLine(line string) bool {
+	return isStringLikePattern(line, `Connected`)
 }
 
 func getAFKStateFromLine(line string) bool {
@@ -89,7 +89,7 @@ func formatMessageForSend(data *BuyData) string {
 func grabLine(line string) {
 	if poeTradeNotifier.config.justWhenAFK {
 		// Fix case if player was AFK and get disconnected for any reasons
-		if isLogStartLine(line) {
+		if isConnectedLine(line) {
 			IsPlayerAFK = false
 			return
 		}
