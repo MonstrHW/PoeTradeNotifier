@@ -7,9 +7,12 @@ import (
 )
 
 const BuyMessagePattern = `@From.*Hi,.*like to buy your `
+const AfkMessagePattern = `AFK mode is now (ON|OFF)`
 
-func isBuyMessage(line string) bool {
-	match, err := regexp.MatchString(BuyMessagePattern, line)
+var IsPlayerAFK bool
+
+func isStringLikePattern(str string, pattern string) bool {
+	match, err := regexp.MatchString(pattern, str)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -17,9 +20,39 @@ func isBuyMessage(line string) bool {
 	return match
 }
 
+func isBuyMessage(message string) bool {
+	return isStringLikePattern(message, BuyMessagePattern)
+}
+
+func isAFKLine(line string) bool {
+	return isStringLikePattern(line, AfkMessagePattern)
+}
+
+func isConnectedLine(line string) bool {
+	return isStringLikePattern(line, `Connected`)
+}
+
+func getAFKStateFromLine(line string) bool {
+	reg := regexp.MustCompile(AfkMessagePattern)
+	afkPart := reg.FindString(line)
+
+	reg = regexp.MustCompile(`(ON|OFF)`)
+	afkState := reg.FindString(afkPart)
+
+	switch afkState {
+	case "ON":
+		return true
+	case "OFF":
+		return false
+
+	default:
+		return false
+	}
+}
+
 type BuyData struct {
 	itemName string
-	price string
+	price    string
 }
 
 func parseBuyMessage(line string) *BuyData {
@@ -54,9 +87,26 @@ func formatMessageForSend(data *BuyData) string {
 }
 
 func grabLine(line string) {
+	if poeTradeNotifier.config.justWhenAFK {
+		// Fix case if player was AFK and get disconnected for any reasons
+		if isConnectedLine(line) {
+			IsPlayerAFK = false
+			return
+		}
+
+		if isAFKLine(line) {
+			IsPlayerAFK = getAFKStateFromLine(line)
+			return
+		}
+
+		if !IsPlayerAFK {
+			return
+		}
+	}
+
 	if isBuyMessage(line) {
 		data := parseBuyMessage(line)
 		message := formatMessageForSend(data)
-		poeTradeNotifier.sendMessageToBot(message)
+		poeTradeNotifier.sendNotify(message)
 	}
 }
