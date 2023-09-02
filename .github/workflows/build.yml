@@ -4,48 +4,40 @@ on:
   pull_request:
     branches:
       - master
-      - dev
-
-    paths-ignore:
-      - '.github/workflows/**'
-      - 'README.md'
-
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
 
-    - name: Set up Go modules
-      run: |
-        go get github.com/go-telegram-bot-api/telegram-bot-api
-        go get github.com/hpcloud/tail
+      - name: Set up Go modules
+        run: |
+          go mod download
 
-    - name: Build for Linux
-      run: |
-        mkdir PoeTradeNotifier
-        go build -v -o ./PoeTradeNotifier ./...
-        mv start.sh ./PoeTradeNotifier
-    - uses: actions/upload-artifact@v2
-      with:
-        name: PoeTradeNotifier_linux
-        path: PoeTradeNotifier/
-    - run: rm -r PoeTradeNotifier
+      - name: Build for Linux
+        run: |
+          mkdir PoeTradeNotifier
+          go build -v -o ./PoeTradeNotifier ./...
+          mv start.sh ./PoeTradeNotifier
+      - uses: actions/upload-artifact@v3
+        with:
+          name: PoeTradeNotifier_linux
+          path: PoeTradeNotifier/
+      - run: rm -r PoeTradeNotifier
 
-    - name: Build for Windows
-      run: |
-        mkdir PoeTradeNotifier
-        GOOS=windows GOARCH=amd64 go build -v -o ./PoeTradeNotifier ./...
-        mv start.bat ./PoeTradeNotifier
-    - uses: actions/upload-artifact@v2
-      with:
-        name: PoeTradeNotifier_windows
-        path: PoeTradeNotifier/
-    - run: rm -r PoeTradeNotifier
+      - name: Build for Windows
+        run: |
+          mkdir PoeTradeNotifier
+          GOOS=windows GOARCH=amd64 go build -v -o ./PoeTradeNotifier ./...
+          mv start.bat ./PoeTradeNotifier
+      - uses: actions/upload-artifact@v3
+        with:
+          name: PoeTradeNotifier_windows
+          path: PoeTradeNotifier/
+      - run: rm -r PoeTradeNotifier
