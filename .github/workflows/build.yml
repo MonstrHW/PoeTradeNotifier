@@ -22,22 +22,20 @@ jobs:
 
       - name: Build for Linux
         run: |
-          mkdir PoeTradeNotifier
-          go build -v -o ./PoeTradeNotifier ./...
-          mv start.sh ./PoeTradeNotifier
+          go build -v -o build/PoeTradeNotifier cmd/main.go
+          mv start.sh build
       - uses: actions/upload-artifact@v3
         with:
           name: PoeTradeNotifier_linux
-          path: PoeTradeNotifier/
-      - run: rm -r PoeTradeNotifier
+          path: build/
+      - run: rm -r build
 
       - name: Build for Windows
         run: |
-          mkdir PoeTradeNotifier
-          GOOS=windows GOARCH=amd64 go build -v -o ./PoeTradeNotifier ./...
-          mv start.bat ./PoeTradeNotifier
+          GOOS=windows GOARCH=amd64 go build -v -o build/PoeTradeNotifier.exe cmd/main.go
+          mv start.bat build
       - uses: actions/upload-artifact@v3
         with:
           name: PoeTradeNotifier_windows
-          path: PoeTradeNotifier/
-      - run: rm -r PoeTradeNotifier
+          path: build/
+      - run: rm -r build
