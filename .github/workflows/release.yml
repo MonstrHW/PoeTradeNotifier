@@ -19,18 +19,18 @@ jobs:
 
       - name: Build for Linux
         run: |
-          go build -v ./...
-          zip PoeTradeNotifier_linux.zip PoeTradeNotifier start.sh
+          go build -v -o PoeTradeNotifier cmd/main.go
+          tar -cvf PoeTradeNotifier_linux.tar PoeTradeNotifier start.sh
 
       - name: Build for Windows
         run: |
-          GOOS=windows GOARCH=amd64 go build -v ./...
+          GOOS=windows GOARCH=amd64 go build -v -o PoeTradeNotifier.exe cmd/main.go
           zip PoeTradeNotifier_windows.zip PoeTradeNotifier.exe start.bat
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            PoeTradeNotifier_linux.zip
+            PoeTradeNotifier_linux.tar
             PoeTradeNotifier_windows.zip
           generate_release_notes: true

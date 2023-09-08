@@ -1,40 +1,37 @@
-package main
+package tgbot
 
 import (
 	"fmt"
-	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 type TgBot struct {
-	api *tgbotapi.BotAPI
+	Api *tgbotapi.BotAPI
 }
 
-func (bot *TgBot) init(token string) {
+func New(token string) (*TgBot, error) {
 	botAPI, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Panic(err)
+		return nil, err
 	}
 
-	log.Printf("Authorized on account %s", botAPI.Self.UserName)
-
-	bot.api = botAPI
+	return &TgBot{botAPI}, nil
 }
 
-func (bot *TgBot) sendMessageByChatID(message string, chatID int64) {
+func (bot *TgBot) SendMessageByChatID(message string, chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, message)
-	bot.api.Send(msg)
+	bot.Api.Send(msg)
 }
 
-func (bot *TgBot) waitCommandAndSendChatID() {
+func (bot *TgBot) WaitCommandAndSendChatID() error {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, err := bot.api.GetUpdatesChan(u)
+	updates, err := bot.Api.GetUpdatesChan(u)
 
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	for update := range updates {
@@ -45,9 +42,11 @@ func (bot *TgBot) waitCommandAndSendChatID() {
 		if update.Message.Text == "/start" {
 			chatID := update.Message.Chat.ID
 			message := fmt.Sprintf("Chat ID: %d", chatID)
-			bot.sendMessageByChatID(message, chatID)
+			bot.SendMessageByChatID(message, chatID)
 
 			break
 		}
 	}
+
+	return nil
 }
