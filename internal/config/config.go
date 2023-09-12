@@ -22,12 +22,19 @@ func (e ParseError) Error() string {
 	return string(e)
 }
 
-func fileExists(path string) bool {
+var (
+	errNoToken            = ParseError("Telegram bot token didn't set")
+	errNoPathToClientFile = ParseError("Path to Client.txt didn't set")
+	errNoClientFile       = ParseError("Client.txt didn't exists in selected path")
+	errNoChatId           = ParseError("Telegram chat id didn't set")
+)
+
+var fileExists = func(path string) bool {
 	_, err := os.Stat(path)
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-func ParseArgs() (*Config, error) {
+var getFlags = func() *Config {
 	path := flag.String("p", "", "path to Client.txt")
 	token := flag.String("t", "", "tg bot token")
 	chatID := flag.Int("c", 0, "tg chat id")
@@ -35,34 +42,37 @@ func ParseArgs() (*Config, error) {
 	sendChatID := flag.Bool("s", false, "start tool only for send current tg chat id")
 	flag.Parse()
 
-	if *token == "" {
-		return nil, ParseError("Telegram Bot Token didn't set")
-	}
-
-	if *sendChatID {
-		return &Config{
-			TgBotToken: *token,
-			SendChatID: *sendChatID,
-		}, nil
-	}
-
-	if *path == "" {
-		return nil, ParseError("Path to Client.txt didn't set")
-	}
-
-	if !fileExists(*path) {
-		return nil, ParseError("File in selected path to Client.txt didn't exists")
-	}
-
-	if *chatID == 0 {
-		return nil, ParseError("Telegram Chat ID didn't set, if you don't know it, start tool with -s key")
-	}
-
 	return &Config{
 		ClientFile:    *path,
 		TgBotToken:    *token,
 		TgChatID:      int64(*chatID),
 		NotifyWhenAFK: *whenAfk,
 		SendChatID:    *sendChatID,
-	}, nil
+	}
+}
+
+func New() (*Config, error) {
+	cfg := getFlags()
+
+	if cfg.TgBotToken == "" {
+		return nil, errNoToken
+	}
+
+	if cfg.SendChatID {
+		return cfg, nil
+	}
+
+	if cfg.ClientFile == "" {
+		return nil, errNoPathToClientFile
+	}
+
+	if !fileExists(cfg.ClientFile) {
+		return nil, errNoClientFile
+	}
+
+	if cfg.TgChatID == 0 {
+		return nil, errNoChatId
+	}
+
+	return cfg, nil
 }
