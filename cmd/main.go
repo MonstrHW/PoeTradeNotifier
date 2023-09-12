@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/MonstrHW/PoeTradeNotifier/internal/config"
 	"github.com/MonstrHW/PoeTradeNotifier/internal/notifier"
@@ -17,24 +16,24 @@ func printAndPause(v ...any) {
 }
 
 func main() {
-	cfg, err := config.ParseArgs()
+	cfg, err := config.New()
 	if err != nil {
 		printAndPause(err)
 		return
 	}
 
-	notif, err := notifier.New(cfg)
+	notif, err := notifier.NewTgTradeNotifier(cfg)
 	if err != nil {
 		printAndPause(err)
 		return
 	}
 
-	log.Printf("Authorized on account %s", notif.Bot.Api.Self.UserName)
+	fmt.Println("Authorized on account ", notif.GetBotName())
 
 	if cfg.SendChatID {
 		fmt.Println(`Started only for send current Telegram Chat ID. Type "/start" in chat with your Bot`)
 
-		if err := notif.Bot.WaitCommandAndSendChatID(); err != nil {
+		if err := notif.WaitCommandAndSendChatID(); err != nil {
 			printAndPause(err)
 		}
 
