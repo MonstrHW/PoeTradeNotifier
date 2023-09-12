@@ -38,16 +38,16 @@ func HandleLogLines(lines chan *tail.Line, cfg *config.Config, notif *notifier.N
 			// Fix case if player was AFK and get disconnected for any reasons
 			if isConnectedLine(l) {
 				isPlayerAFK = false
-				return
+				continue
 			}
 
 			if isAFKLine(l) {
 				isPlayerAFK = getAFKStateFromLine(l)
-				return
+				continue
 			}
 
 			if !isPlayerAFK {
-				return
+				continue
 			}
 		}
 
