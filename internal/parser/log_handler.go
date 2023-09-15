@@ -35,17 +35,17 @@ func HandleLogLines(lines chan *tail.Line, cfg *config.Config, notif Notifier) {
 	var isPlayerAFK bool
 
 	for line := range lines {
-		l := line.Text
+		l := LogLine(line.Text)
 
 		if cfg.NotifyWhenAFK {
 			// Fix case if player was AFK and get disconnected for any reasons
-			if isConnectedLine(l) {
+			if l.IsConnected() {
 				isPlayerAFK = false
 				continue
 			}
 
-			if isAFKLine(l) {
-				isPlayerAFK = getAFKStateFromLine(l)
+			if l.IsAFK() {
+				isPlayerAFK = l.GetAFKState()
 				continue
 			}
 
@@ -54,8 +54,8 @@ func HandleLogLines(lines chan *tail.Line, cfg *config.Config, notif Notifier) {
 			}
 		}
 
-		if isBuyMessage(l) {
-			data := parseBuyMessage(l)
+		if l.IsBuyMessage() {
+			data := l.ParseBuyMessage()
 			notif.Notify(data.String())
 		}
 	}
