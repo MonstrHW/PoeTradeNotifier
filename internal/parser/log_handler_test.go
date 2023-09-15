@@ -17,7 +17,7 @@ func (mock *MockNotifier) Notify(message string) {
 
 func TestHandleLogLines(t *testing.T) {
 	const correctBuyMessage = `2021/07/27 18:15:52 999999999 bb1 [INFO Client 9999] @From Nickname: Hi, I'd like to buy your 1 Haunting Shadows for my 3 Chaos Orb in League.`
-	notifiedMessage := parseBuyMessage(correctBuyMessage).String()
+	notifiedMessage := LogLine(correctBuyMessage).ParseBuyMessage().String()
 
 	const wrongBuyMessage = `2021/07/27 18:15:46 999999999 bb1 [INFO Client 9999] Einhar, Beastmaster: This one is captured. Einhar will take it.`
 

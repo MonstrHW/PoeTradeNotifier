@@ -4,28 +4,32 @@ import (
 	"regexp"
 )
 
-const buyMessagePattern = `@From.*Hi,.*like to buy your `
-const afkMessagePattern = `AFK mode is now (ON|OFF)`
+const (
+	buyMessagePattern = `@From.*Hi,.*like to buy your `
+	afkMessagePattern = `AFK mode is now (ON|OFF)`
+)
 
-func isStringLikePattern(str string, pattern string) bool {
-	return regexp.MustCompile(pattern).MatchString(str)
+type LogLine string
+
+func (l LogLine) isLikePattern(pattern string) bool {
+	return regexp.MustCompile(pattern).MatchString(string(l))
 }
 
-func isBuyMessage(message string) bool {
-	return isStringLikePattern(message, buyMessagePattern)
+func (l LogLine) IsBuyMessage() bool {
+	return l.isLikePattern(buyMessagePattern)
 }
 
-func isAFKLine(line string) bool {
-	return isStringLikePattern(line, afkMessagePattern)
+func (l LogLine) IsAFK() bool {
+	return l.isLikePattern(afkMessagePattern)
 }
 
-func isConnectedLine(line string) bool {
-	return isStringLikePattern(line, `Connected`)
+func (l LogLine) IsConnected() bool {
+	return l.isLikePattern(`Connected`)
 }
 
-func getAFKStateFromLine(line string) bool {
+func (l LogLine) GetAFKState() bool {
 	reg := regexp.MustCompile(afkMessagePattern)
-	afkPart := reg.FindString(line)
+	afkPart := reg.FindString(string(l))
 
 	reg = regexp.MustCompile(`(ON|OFF)`)
 	afkState := reg.FindString(afkPart)
@@ -41,9 +45,9 @@ func getAFKStateFromLine(line string) bool {
 	}
 }
 
-func parseBuyMessage(line string) *buyData {
+func (l LogLine) ParseBuyMessage() *buyData {
 	re := regexp.MustCompile(buyMessagePattern)
-	split := re.Split(line, 2)
+	split := re.Split(string(l), 2)
 
 	re = regexp.MustCompile(`( listed for )|( for my )`)
 	split = re.Split(split[1], 2)
