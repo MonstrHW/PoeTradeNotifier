@@ -16,3 +16,7 @@ func (data buyData) String() string {
 
 	return fmt.Sprintf("Item: %s, Price: %s", data.itemName, price)
 }
+
+func (data buyData) GoString() string {
+	return fmt.Sprintf(`["%s", "%s"]`, data.itemName, data.price)
+}

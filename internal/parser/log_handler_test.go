@@ -16,41 +16,36 @@ func (mock *MockNotifier) Notify(message string) {
 }
 
 func TestHandleLogLines(t *testing.T) {
-	const correctBuyMessage = `2021/07/27 18:15:52 999999999 bb1 [INFO Client 9999] @From Nickname: Hi, I'd like to buy your 1 Haunting Shadows for my 3 Chaos Orb in League.`
-	notifiedMessage := LogLine(correctBuyMessage).ParseBuyMessage().String()
-
-	const wrongBuyMessage = `2021/07/27 18:15:46 999999999 bb1 [INFO Client 9999] Einhar, Beastmaster: This one is captured. Einhar will take it.`
-
-	const afkMessage = `2021/07/24 22:08:23 999999999 bb1 [INFO Client 9999] : AFK mode is now ON. Autoreply "brb"`
+	notifiedMessage := buyMessage.ParseBuyMessage().String()
 
 	testTable := []struct {
 		name string
 
-		logLines []string
+		logLines []LogLine
 		expected string
 		cfg      *config.Config
 	}{
 		{
 			name:     "notify buy message",
-			logLines: []string{correctBuyMessage},
+			logLines: []LogLine{buyMessage},
 			expected: notifiedMessage,
 			cfg:      &config.Config{},
 		},
 		{
 			name:     "don't notify wrong message",
-			logLines: []string{wrongBuyMessage},
+			logLines: []LogLine{wrongLogLine},
 			expected: "",
 			cfg:      &config.Config{},
 		},
 		{
 			name:     "notify buy message with afk option and we are afk",
-			logLines: []string{afkMessage, correctBuyMessage},
+			logLines: []LogLine{afkOn, buyMessage},
 			expected: notifiedMessage,
 			cfg:      &config.Config{NotifyWhenAFK: true},
 		},
 		{
 			name:     "don't notify buy message with afk option and we are not afk",
-			logLines: []string{correctBuyMessage},
+			logLines: []LogLine{buyMessage},
 			expected: "",
 			cfg:      &config.Config{NotifyWhenAFK: true},
 		},
@@ -62,7 +57,7 @@ func TestHandleLogLines(t *testing.T) {
 
 			go func() {
 				for _, line := range tt.logLines {
-					lines <- &tail.Line{Text: line}
+					lines <- &tail.Line{Text: string(line)}
 				}
 
 				close(lines)
