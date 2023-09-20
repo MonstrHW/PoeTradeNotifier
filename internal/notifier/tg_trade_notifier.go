@@ -13,7 +13,7 @@ type TgTradeNotifier struct {
 }
 
 func NewTgTradeNotifier(cfg *config.Config) (*TgTradeNotifier, error) {
-	bot, err := tgbotapi.NewBotAPI(cfg.TgBotToken)
+	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +60,7 @@ func (notifier *TgTradeNotifier) WaitCommandAndSendChatID() error {
 	return nil
 }
 
-func (notifier *TgTradeNotifier) Notify(message string) {
+func (notifier *TgTradeNotifier) Notify(message string) error {
 	notifier.sendMessageByChatID(message, notifier.tgChatID)
+	return nil
 }

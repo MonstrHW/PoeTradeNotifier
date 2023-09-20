@@ -3,15 +3,28 @@ package config
 import (
 	"errors"
 	"flag"
+	"io"
 	"os"
 )
 
+type NotifierType int
+
+const (
+	Undefined NotifierType = iota
+	Telegram
+	Discord
+)
+
 type Config struct {
+	NotifierType NotifierType
+	BotToken     string
+
 	ClientFile string
 
-	TgBotToken string
 	TgChatID   int64
 	SendChatID bool
+
+	DiscordUserID string
 
 	NotifyWhenAFK bool
 }
@@ -23,10 +36,13 @@ func (e ParseError) Error() string {
 }
 
 var (
-	errNoToken            = ParseError("Telegram bot token didn't set")
+	errNoNotifierType     = ParseError("Notifier type didn't set")
+	errWrongNotifierType  = ParseError("Wrong notifier type")
+	errNoToken            = ParseError("Telegram/Discord bot token didn't set")
 	errNoPathToClientFile = ParseError("Path to Client.txt didn't set")
 	errNoClientFile       = ParseError("Client.txt didn't exists in selected path")
 	errNoChatId           = ParseError("Telegram chat id didn't set")
+	errNoUserId           = ParseError("Discord user id didn't set")
 )
 
 var fileExists = func(path string) bool {
@@ -34,31 +50,76 @@ var fileExists = func(path string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-var getFlags = func() *Config {
-	path := flag.String("p", "", "path to Client.txt")
-	token := flag.String("t", "", "tg bot token")
-	chatID := flag.Int("c", 0, "tg chat id")
-	whenAfk := flag.Bool("a", false, "send notifications only when AFK")
-	sendChatID := flag.Bool("s", false, "start tool only for send current tg chat id")
-	flag.Parse()
+func parseNotifierType(s string, nt *NotifierType) error {
+	switch s {
+	case "telegram":
+		*nt = Telegram
+		return nil
+	case "discord":
+		*nt = Discord
+		return nil
 
-	return &Config{
-		ClientFile:    *path,
-		TgBotToken:    *token,
-		TgChatID:      int64(*chatID),
-		NotifyWhenAFK: *whenAfk,
-		SendChatID:    *sendChatID,
+	case "":
+		*nt = Undefined
+		return errNoNotifierType
+	default:
+		*nt = Undefined
+		return errWrongNotifierType
 	}
 }
 
-func New() (*Config, error) {
-	cfg := getFlags()
+var getFlags = func() (*Config, error) {
+	f := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+	//Disable error output and printing help message on parse error.
+	//Instead operate with errors we got.
+	f.SetOutput(io.Discard)
 
-	if cfg.TgBotToken == "" {
+	var nt NotifierType
+	f.Func("n", "notifier type", func(s string) error {
+		return parseNotifierType(s, &nt)
+	})
+	path := f.String("p", "", "path to Client.txt")
+	token := f.String("t", "", "tg/discord bot token")
+	chatID := f.Int64("c", 0, "tg chat id")
+	userID := f.String("u", "", "discord user id")
+	whenAfk := f.Bool("a", false, "send notifications only when AFK")
+	sendChatID := f.Bool("s", false, "start tool only for send current tg chat id")
+
+	err := f.Parse(os.Args[1:])
+	//Print help manually
+	if err == flag.ErrHelp {
+		f.SetOutput(os.Stdout)
+		f.PrintDefaults()
+		//Empty error for stop in top of the program
+		return nil, errors.New("")
+	}
+
+	return &Config{
+		NotifierType:  nt,
+		BotToken:      *token,
+		ClientFile:    *path,
+		TgChatID:      *chatID,
+		SendChatID:    *sendChatID,
+		DiscordUserID: *userID,
+		NotifyWhenAFK: *whenAfk,
+	}, err
+}
+
+func New() (*Config, error) {
+	cfg, err := getFlags()
+	if err != nil {
+		return nil, err
+	}
+
+	if cfg.NotifierType == Undefined {
+		return nil, errNoNotifierType
+	}
+
+	if cfg.BotToken == "" {
 		return nil, errNoToken
 	}
 
-	if cfg.SendChatID {
+	if cfg.NotifierType == Telegram && cfg.SendChatID {
 		return cfg, nil
 	}
 
@@ -70,8 +131,12 @@ func New() (*Config, error) {
 		return nil, errNoClientFile
 	}
 
-	if cfg.TgChatID == 0 {
+	if cfg.NotifierType == Telegram && cfg.TgChatID == 0 {
 		return nil, errNoChatId
+	}
+
+	if cfg.NotifierType == Discord && cfg.DiscordUserID == "" {
+		return nil, errNoUserId
 	}
 
 	return cfg, nil
