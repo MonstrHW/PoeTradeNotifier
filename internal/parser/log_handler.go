@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/MonstrHW/PoeTradeNotifier/internal/config"
+	"github.com/MonstrHW/PoeTradeNotifier/internal/notifier"
 	"github.com/hpcloud/tail"
 )
 
@@ -27,11 +28,7 @@ func StartTailFile(file string) (chan *tail.Line, error) {
 	return t.Lines, nil
 }
 
-type Notifier interface {
-	Notify(message string)
-}
-
-func HandleLogLines(lines chan *tail.Line, cfg *config.Config, notif Notifier) {
+func HandleLogLines(lines chan *tail.Line, cfg *config.Config, notif notifier.Notifier) {
 	var isPlayerAFK bool
 
 	for line := range lines {

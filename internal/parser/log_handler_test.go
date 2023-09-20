@@ -11,8 +11,9 @@ type MockNotifier struct {
 	out string
 }
 
-func (mock *MockNotifier) Notify(message string) {
+func (mock *MockNotifier) Notify(message string) error {
 	mock.out = message
+	return nil
 }
 
 func TestHandleLogLines(t *testing.T) {

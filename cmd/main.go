@@ -15,6 +15,10 @@ func printAndPause(v ...any) {
 	fmt.Scanln()
 }
 
+type BotNamer interface {
+	GetBotName() string
+}
+
 func main() {
 	cfg, err := config.New()
 	if err != nil {
@@ -22,23 +26,23 @@ func main() {
 		return
 	}
 
-	notif, err := notifier.NewTgTradeNotifier(cfg)
+	n, err := notifier.NewNotifier(cfg)
 	if err != nil {
 		printAndPause(err)
 		return
 	}
 
-	fmt.Println("Authorized on account ", notif.GetBotName())
-
-	if cfg.SendChatID {
+	if cfg.NotifierType == config.Telegram && cfg.SendChatID {
 		fmt.Println(`Started only for send current Telegram Chat ID. Type "/start" in chat with your Bot`)
 
-		if err := notif.WaitCommandAndSendChatID(); err != nil {
+		if err := n.(*notifier.TgTradeNotifier).WaitCommandAndSendChatID(); err != nil {
 			printAndPause(err)
 		}
 
 		return
 	}
+
+	fmt.Println("Authorized on bot", n.(BotNamer).GetBotName())
 
 	lines, err := parser.StartTailFile(cfg.ClientFile)
 	if err != nil {
@@ -46,5 +50,5 @@ func main() {
 		return
 	}
 
-	parser.HandleLogLines(lines, cfg, notif)
+	parser.HandleLogLines(lines, cfg, n)
 }
