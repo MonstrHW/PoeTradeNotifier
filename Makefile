@@ -22,7 +22,6 @@ build_linux:
 	go build ${LDFLAGS} -v -o build/PoeTradeNotifier cmd/main.go
 
 build_windows:
-	go build ${LDFLAGS} -v -o build/PoeTradeNotifier cmd/main.go
 	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -v -o build/PoeTradeNotifier.exe cmd/main.go
 
 test:

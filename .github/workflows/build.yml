@@ -9,7 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -22,7 +25,7 @@ jobs:
 
       - name: Build for Linux
         run: |
-          go build -v -o build/PoeTradeNotifier cmd/main.go
+          make build_linux
           mv start.sh build
       - uses: actions/upload-artifact@v3
         with:
@@ -32,7 +35,7 @@ jobs:
 
       - name: Build for Windows
         run: |
-          GOOS=windows GOARCH=amd64 go build -v -o build/PoeTradeNotifier.exe cmd/main.go
+          make build_windows
           mv start.bat build
       - uses: actions/upload-artifact@v3
         with:
