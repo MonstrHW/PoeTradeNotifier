@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 )
@@ -84,6 +85,7 @@ var getFlags = func() (*Config, error) {
 	userID := f.String("u", "", "discord user id")
 	whenAfk := f.Bool("a", false, "send notifications only when AFK")
 	sendChatID := f.Bool("s", false, "start tool only for send current tg chat id")
+	version := f.Bool("v", false, "version")
 
 	err := f.Parse(os.Args[1:])
 	//Print help manually
@@ -91,6 +93,11 @@ var getFlags = func() (*Config, error) {
 		f.SetOutput(os.Stdout)
 		f.PrintDefaults()
 		//Empty error for stop in top of the program
+		return nil, errors.New("")
+	}
+
+	if *version {
+		fmt.Println(GetAppVersion())
 		return nil, errors.New("")
 	}
 

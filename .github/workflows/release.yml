@@ -6,7 +6,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -19,12 +21,14 @@ jobs:
 
       - name: Build for Linux
         run: |
-          go build -v -o PoeTradeNotifier cmd/main.go
+          make build_linux
+          mv build/PoeTradeNotifier ./
           tar -cvf PoeTradeNotifier_linux.tar PoeTradeNotifier start.sh
 
       - name: Build for Windows
         run: |
-          GOOS=windows GOARCH=amd64 go build -v -o PoeTradeNotifier.exe cmd/main.go
+          make build_windows
+          mv build/PoeTradeNotifier.exe ./
           zip PoeTradeNotifier_windows.zip PoeTradeNotifier.exe start.bat
 
       - name: Release
