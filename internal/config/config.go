@@ -28,6 +28,8 @@ type Config struct {
 	DiscordUserID string
 
 	NotifyWhenAFK bool
+
+	configExists func(string) bool
 }
 
 type ParseError string
@@ -46,7 +48,7 @@ var (
 	errNoUserId           = ParseError("Discord user id didn't set")
 )
 
-var fileExists = func(path string) bool {
+func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return !errors.Is(err, os.ErrNotExist)
 }
@@ -69,7 +71,7 @@ func parseNotifierType(s string, nt *NotifierType) error {
 	}
 }
 
-var getFlags = func() (*Config, error) {
+func getFlags() (*Config, error) {
 	f := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	//Disable error output and printing help message on parse error.
 	//Instead operate with errors we got.
@@ -112,38 +114,49 @@ var getFlags = func() (*Config, error) {
 	}, err
 }
 
+func (cfg *Config) validate() error {
+	if cfg.NotifierType == Undefined {
+		return errNoNotifierType
+	}
+
+	if cfg.BotToken == "" {
+		return errNoToken
+	}
+
+	if cfg.NotifierType == Telegram && cfg.SendChatID {
+		return nil
+	}
+
+	if cfg.ClientFile == "" {
+		return errNoPathToClientFile
+	}
+
+	if !cfg.configExists(cfg.ClientFile) {
+		return errNoClientFile
+	}
+
+	if cfg.NotifierType == Telegram && cfg.TgChatID == 0 {
+		return errNoChatId
+	}
+
+	if cfg.NotifierType == Discord && cfg.DiscordUserID == "" {
+		return errNoUserId
+	}
+
+	return nil
+}
+
 func New() (*Config, error) {
 	cfg, err := getFlags()
 	if err != nil {
 		return nil, err
 	}
 
-	if cfg.NotifierType == Undefined {
-		return nil, errNoNotifierType
-	}
+	cfg.configExists = fileExists
 
-	if cfg.BotToken == "" {
-		return nil, errNoToken
-	}
-
-	if cfg.NotifierType == Telegram && cfg.SendChatID {
-		return cfg, nil
-	}
-
-	if cfg.ClientFile == "" {
-		return nil, errNoPathToClientFile
-	}
-
-	if !fileExists(cfg.ClientFile) {
-		return nil, errNoClientFile
-	}
-
-	if cfg.NotifierType == Telegram && cfg.TgChatID == 0 {
-		return nil, errNoChatId
-	}
-
-	if cfg.NotifierType == Discord && cfg.DiscordUserID == "" {
-		return nil, errNoUserId
+	err = cfg.validate()
+	if err != nil {
+		return nil, err
 	}
 
 	return cfg, nil

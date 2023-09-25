@@ -20,17 +20,11 @@ func TestParseNotifierType(t *testing.T) {
 }
 
 func TestConfigErrors(t *testing.T) {
-	oldGetFlags := getFlags
-	oldFileExists := fileExists
-
 	cfg := &Config{}
-	getFlags = func() (*Config, error) {
-		return cfg, nil
-	}
 
-	var fe bool
-	fileExists = func(path string) bool {
-		return fe
+	var ce bool
+	cfg.configExists = func(path string) bool {
+		return ce
 	}
 
 	testTable := []struct {
@@ -60,7 +54,7 @@ func TestConfigErrors(t *testing.T) {
 		{
 			prepare: func() {
 				cfg.ClientFile = "path"
-				fe = false
+				ce = false
 			},
 			wantError: errNoClientFile,
 		},
@@ -68,7 +62,7 @@ func TestConfigErrors(t *testing.T) {
 			prepare: func() {
 				cfg.NotifierType = Telegram
 				cfg.TgChatID = 0
-				fe = true
+				ce = true
 			},
 			wantError: errNoChatId,
 		},
@@ -84,14 +78,11 @@ func TestConfigErrors(t *testing.T) {
 	for _, tt := range testTable {
 		t.Run(tt.wantError.Error(), func(t *testing.T) {
 			tt.prepare()
-			_, err := New()
+			err := cfg.validate()
 
 			if !errors.Is(err, tt.wantError) {
 				t.Errorf(`need "%v", got "%v"`, tt.wantError, err)
 			}
 		})
 	}
-
-	getFlags = oldGetFlags
-	fileExists = oldFileExists
 }
