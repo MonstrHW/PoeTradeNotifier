@@ -7,7 +7,7 @@ ifeq (${HASH_COMMIT},HEAD)
 endif
 
 ifneq ($(shell git status --porcelain),)
-	NOTE=build with uncommited changes
+	NOTE=build with uncommitted changes
 endif
 
 VERSION_PKG=github.com/MonstrHW/PoeTradeNotifier/internal/config
