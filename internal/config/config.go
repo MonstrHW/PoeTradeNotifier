@@ -29,6 +29,8 @@ type Config struct {
 
 	NotifyWhenAFK bool
 
+	NotifyWhenDisconnected bool
+
 	configExists func(string) bool
 }
 
@@ -93,6 +95,7 @@ func getFlags() (*Config, error) {
 	chatID := f.Int64("c", 0, "tg chat id")
 	userID := f.String("u", "", "discord user id")
 	whenAfk := f.Bool("a", false, "send notifications only when AFK")
+	whenDisconnected := f.Bool("d", false, "notify about abnormal disconnect")
 	sendChatID := f.Bool("s", false, "start tool only for send current tg chat id")
 	version := f.Bool("v", false, "version")
 
@@ -112,13 +115,14 @@ func getFlags() (*Config, error) {
 	}
 
 	return &Config{
-		NotifierType:  nt,
-		BotToken:      *token,
-		ClientFile:    *path,
-		TgChatID:      *chatID,
-		SendChatID:    *sendChatID,
-		DiscordUserID: *userID,
-		NotifyWhenAFK: *whenAfk,
+		NotifierType:           nt,
+		BotToken:               *token,
+		ClientFile:             *path,
+		TgChatID:               *chatID,
+		SendChatID:             *sendChatID,
+		DiscordUserID:          *userID,
+		NotifyWhenAFK:          *whenAfk,
+		NotifyWhenDisconnected: *whenDisconnected,
 	}, err
 }
 

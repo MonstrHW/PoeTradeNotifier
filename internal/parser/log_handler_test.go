@@ -50,6 +50,36 @@ func TestHandleLogLines(t *testing.T) {
 			expected: "",
 			cfg:      &config.Config{NotifyWhenAFK: true},
 		},
+		{
+			name:     "notify about abnormal disconnect when option set",
+			logLines: []LogLine{abnormalDisconnect},
+			expected: abnormalDisconnectMessage,
+			cfg:      &config.Config{NotifyWhenDisconnected: true},
+		},
+		{
+			name:     "don't notify about abnormal disconnect when option not set",
+			logLines: []LogLine{abnormalDisconnect},
+			expected: "",
+			cfg:      &config.Config{},
+		},
+		{
+			name:     "notify about abnormal disconnect with afk option and we are afk",
+			logLines: []LogLine{afkOn, abnormalDisconnect},
+			expected: abnormalDisconnectMessage,
+			cfg: &config.Config{
+				NotifyWhenAFK:          true,
+				NotifyWhenDisconnected: true,
+			},
+		},
+		{
+			name:     "don't notify about abnormal disconnect with afk option and we are not afk",
+			logLines: []LogLine{abnormalDisconnect},
+			expected: "",
+			cfg: &config.Config{
+				NotifyWhenAFK:          true,
+				NotifyWhenDisconnected: true,
+			},
+		},
 	}
 
 	for _, tt := range testTable {

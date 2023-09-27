@@ -29,6 +29,8 @@ var (
 	buyMessageBulk  = LogLine(formatLogBuyBulk("1 Haunting Shadows for my 3 Chaos Orb"))
 	buyMessageOffer = LogLine(formatLogBuy("Kraken Shell Vaal Regalia"))
 
+	abnormalDisconnect = LogLine(formatLogLine("Abnormal disconnect: An unexpected disconnection occurred."))
+
 	wrongLogLine = LogLine(formatLogLine("Einhar, Beastmaster: This one is captured. Einhar will take it."))
 )
 
@@ -88,6 +90,20 @@ func TestIsConnected(t *testing.T) {
 
 	t.Run("wrong line", func(t *testing.T) {
 		if wrongLogLine.IsConnected() {
+			t.Fail()
+		}
+	})
+}
+
+func TestIsAbnormalDisconnect(t *testing.T) {
+	t.Run("correct line", func(t *testing.T) {
+		if !abnormalDisconnect.IsAbnormalDisconnect() {
+			t.Fail()
+		}
+	})
+
+	t.Run("wrong line", func(t *testing.T) {
+		if wrongLogLine.IsAbnormalDisconnect() {
 			t.Fail()
 		}
 	})
