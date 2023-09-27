@@ -71,6 +71,13 @@ func parseNotifierType(s string, nt *NotifierType) error {
 	}
 }
 
+func PauseAndExit(exitCode int) {
+	fmt.Print("\nPress Enter for exit...")
+	fmt.Scanln()
+
+	os.Exit(exitCode)
+}
+
 func getFlags() (*Config, error) {
 	f := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	//Disable error output and printing help message on parse error.
@@ -94,13 +101,14 @@ func getFlags() (*Config, error) {
 	if err == flag.ErrHelp {
 		f.SetOutput(os.Stdout)
 		f.PrintDefaults()
-		//Empty error for stop in top of the program
-		return nil, errors.New("")
+
+		PauseAndExit(0)
 	}
 
 	if *version {
 		fmt.Println(GetAppVersion())
-		return nil, errors.New("")
+
+		PauseAndExit(0)
 	}
 
 	return &Config{
