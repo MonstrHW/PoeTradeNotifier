@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/MonstrHW/PoeTradeNotifier/internal/config"
 	"github.com/MonstrHW/PoeTradeNotifier/internal/notifier"
 	"github.com/MonstrHW/PoeTradeNotifier/internal/parser"
 )
 
-func printAndPause(v ...any) {
-	fmt.Println(v...)
+func printFatalError(err error) {
+	fmt.Fprintln(os.Stderr, err)
 
-	fmt.Println("Press Enter for exit...")
-	fmt.Scanln()
+	config.PauseAndExit(1)
 }
 
 type BotNamer interface {
@@ -22,21 +22,19 @@ type BotNamer interface {
 func main() {
 	cfg, err := config.New()
 	if err != nil {
-		printAndPause(err)
-		return
+		printFatalError(err)
 	}
 
 	n, err := notifier.NewNotifier(cfg)
 	if err != nil {
-		printAndPause(err)
-		return
+		printFatalError(err)
 	}
 
 	if cfg.NotifierType == config.Telegram && cfg.SendChatID {
 		fmt.Println(`Started only for send current Telegram Chat ID. Type "/start" in chat with your Bot`)
 
 		if err := n.(*notifier.TgTradeNotifier).WaitCommandAndSendChatID(); err != nil {
-			printAndPause(err)
+			printFatalError(err)
 		}
 
 		return
@@ -46,8 +44,7 @@ func main() {
 
 	lines, err := parser.StartTailFile(cfg.ClientFile)
 	if err != nil {
-		printAndPause(err)
-		return
+		printFatalError(err)
 	}
 
 	parser.HandleLogLines(lines, cfg, n)
