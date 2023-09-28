@@ -28,6 +28,8 @@ func StartTailFile(file string) (chan *tail.Line, error) {
 	return t.Lines, nil
 }
 
+const abnormalDisconnectMessage = "Abnormal disconnect!"
+
 func HandleLogLines(lines chan *tail.Line, cfg *config.Config, notif notifier.Notifier) {
 	var isPlayerAFK bool
 
@@ -51,7 +53,9 @@ func HandleLogLines(lines chan *tail.Line, cfg *config.Config, notif notifier.No
 			}
 		}
 
-		if l.IsBuyMessage() {
+		if cfg.NotifyWhenDisconnected && l.IsAbnormalDisconnect() {
+			notif.Notify(abnormalDisconnectMessage)
+		} else if l.IsBuyMessage() {
 			data := l.ParseBuyMessage()
 			notif.Notify(data.String())
 		}

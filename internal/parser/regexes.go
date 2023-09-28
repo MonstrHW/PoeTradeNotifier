@@ -27,6 +27,10 @@ func (l LogLine) IsConnected() bool {
 	return l.isLikePattern(`Connected`)
 }
 
+func (l LogLine) IsAbnormalDisconnect() bool {
+	return l.isLikePattern("Abnormal disconnect")
+}
+
 func (l LogLine) GetAFKState() bool {
 	reg := regexp.MustCompile(afkMessagePattern)
 	afkPart := reg.FindString(string(l))
